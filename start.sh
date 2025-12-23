@@ -6,5 +6,8 @@ php artisan migrate --force
 # Seed database
 php artisan db:seed --force
 
-# Start server with proper port handling
-php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# Get port as integer (default 8000)
+PORT_NUM=${PORT:-8000}
+
+# Start the built-in PHP server directly (bypassing artisan serve)
+php -S 0.0.0.0:$PORT_NUM -t public
