@@ -1,0 +1,23 @@
+# Laravel
+/vendor/
+node_modules/
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+storage/*.key
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# SQLite
+*.sqlite
+*.sqlite-journal
