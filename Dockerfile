@@ -1,8 +1,5 @@
 FROM php:8.4-cli
 
-# Cache buster - change to force rebuild
-ARG CACHEBUST=2
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
@@ -24,23 +21,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy composer files first for better caching
-COPY composer.json composer.lock ./
+# Copy all application files first
+COPY . .
 
 # Install composer dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Copy package files
-COPY package.json package-lock.json ./
-
-# Install npm dependencies
-RUN npm ci
-
-# Copy all application files
-COPY . .
-
-# Build assets
-RUN npm run build
+# Install npm dependencies and build
+RUN npm ci && npm run build
 
 # Create storage directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
