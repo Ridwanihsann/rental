@@ -34,13 +34,9 @@ RUN npm ci && npm run build
 RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache
 
-# Cache Laravel config
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Make startup script executable
+RUN chmod +x start.sh
 
-# Expose port
-EXPOSE $PORT
+# Start command using bash script
+CMD ["./start.sh"]
 
-# Start command
-CMD php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT
