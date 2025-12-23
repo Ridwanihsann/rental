@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     nodejs \
-    npm
+    npm \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
@@ -21,18 +22,24 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /app
 
-# Copy all application files first
+# Copy all application files
 COPY . .
 
-# Install composer dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install composer dependencies (skip scripts to avoid artisan issues during build)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Install npm dependencies and build
+# Run artisan package:discover manually after composer install
+RUN php artisan package:discover --ansi
+
+# Install npm dependencies and build assets
 RUN npm ci && npm run build
 
 # Create storage directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache
 
-# Start command - use PHP built-in server directly
+# Expose port for documentation
+EXPOSE 8000
+
+# Start command - run migrations, seed, and start PHP server
 CMD ["sh", "-c", "php artisan migrate --force && php artisan db:seed --force && php -S 0.0.0.0:${PORT:-8000} -t public"]
