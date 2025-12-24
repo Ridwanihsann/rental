@@ -1,25 +1,41 @@
-const CACHE_NAME = 'rental-app-v1';
+const CACHE_NAME = 'rental-app-v3';
 const STATIC_ASSETS = [
     '/',
     '/items',
-    '/css/app.css',
-    '/js/app.js',
     '/manifest.json',
-    '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    '/offline.html',
+    '/icons/icon.svg'
+];
+
+// Optional assets - won't fail if missing
+const OPTIONAL_ASSETS = [
+    '/css/app.css',
+    '/js/app.js'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', event => {
     console.log('[SW] Installing...');
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
+        caches.open(CACHE_NAME).then(async cache => {
             console.log('[SW] Caching static assets');
-            return cache.addAll(STATIC_ASSETS);
+            // Cache required assets
+            await cache.addAll(STATIC_ASSETS);
+
+            // Cache optional assets individually (won't fail if missing)
+            for (const asset of OPTIONAL_ASSETS) {
+                try {
+                    await cache.add(asset);
+                    console.log('[SW] Cached:', asset);
+                } catch (err) {
+                    console.log('[SW] Optional asset not available:', asset);
+                }
+            }
         })
     );
     self.skipWaiting();
 });
+
 
 // Activate event - clean old caches
 self.addEventListener('activate', event => {
@@ -39,14 +55,14 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     // Skip non-GET requests
     if (event.request.method !== 'GET') return;
-    
+
     // Skip API calls - always fetch from network
     if (event.request.url.includes('/api/')) {
         event.respondWith(
             fetch(event.request).catch(() => {
-                return new Response(JSON.stringify({ 
-                    error: 'Offline', 
-                    message: 'Tidak ada koneksi internet' 
+                return new Response(JSON.stringify({
+                    error: 'Offline',
+                    message: 'Tidak ada koneksi internet'
                 }), {
                     status: 503,
                     headers: { 'Content-Type': 'application/json' }
@@ -55,7 +71,7 @@ self.addEventListener('fetch', event => {
         );
         return;
     }
-    
+
     // For HTML pages - network first, cache fallback
     if (event.request.headers.get('accept').includes('text/html')) {
         event.respondWith(
@@ -76,7 +92,7 @@ self.addEventListener('fetch', event => {
         );
         return;
     }
-    
+
     // For other assets - cache first, network fallback
     event.respondWith(
         caches.match(event.request).then(cached => {
@@ -103,7 +119,7 @@ async function syncRentals() {
     // Get pending rentals from IndexedDB and sync to server
     const db = await openDB();
     const pending = await db.getAll('pendingRentals');
-    
+
     for (const rental of pending) {
         try {
             await fetch('/api/rentals', {
@@ -122,7 +138,7 @@ async function syncRentals() {
 function openDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open('RentalAppDB', 1);
-        
+
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve({
             db: request.result,
@@ -139,7 +155,7 @@ function openDB() {
                 req.onerror = () => rej(req.error);
             })
         });
-        
+
         request.onupgradeneeded = (e) => {
             const db = e.target.result;
             if (!db.objectStoreNames.contains('pendingRentals')) {

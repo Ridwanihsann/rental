@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0F172A"/>
+      <stop offset="100%" style="stop-color:#1E293B"/>
+    </linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="url(#bg)"/>
+  
+  <!-- Header -->
+  <rect x="16" y="60" width="358" height="60" rx="12" fill="#1E293B"/>
+  <text x="32" y="98" fill="#E2E8F0" font-family="sans-serif" font-size="20" font-weight="bold">RentalApp</text>
+  
+  <!-- Search Bar -->
+  <rect x="16" y="136" width="358" height="48" rx="8" fill="#334155"/>
+  <text x="32" y="168" fill="#94A3B8" font-family="sans-serif" font-size="14">Cari barang...</text>
+  
+  <!-- Item Cards -->
+  <rect x="16" y="200" width="358" height="100" rx="12" fill="#1E293B"/>
+  <circle cx="66" cy="250" r="35" fill="#6366F1"/>
+  <text x="116" y="235" fill="#E2E8F0" font-family="sans-serif" font-size="16" font-weight="bold">Sony A7III</text>
+  <text x="116" y="260" fill="#94A3B8" font-family="sans-serif" font-size="12">CAM-001</text>
+  <rect x="116" y="270" width="60" height="20" rx="4" fill="#22C55E"/>
+  <text x="126" y="284" fill="white" font-family="sans-serif" font-size="10">Tersedia</text>
+  
+  <rect x="16" y="316" width="358" height="100" rx="12" fill="#1E293B"/>
+  <circle cx="66" cy="366" r="35" fill="#8B5CF6"/>
+  <text x="116" y="351" fill="#E2E8F0" font-family="sans-serif" font-size="16" font-weight="bold">Canon 24-70mm</text>
+  <text x="116" y="376" fill="#94A3B8" font-family="sans-serif" font-size="12">LENS-002</text>
+  <rect x="116" y="386" width="60" height="20" rx="4" fill="#EF4444"/>
+  <text x="126" y="400" fill="white" font-family="sans-serif" font-size="10">Disewa</text>
+  
+  <rect x="16" y="432" width="358" height="100" rx="12" fill="#1E293B"/>
+  <circle cx="66" cy="482" r="35" fill="#EC4899"/>
+  <text x="116" y="467" fill="#E2E8F0" font-family="sans-serif" font-size="16" font-weight="bold">DJI RS3 Pro</text>
+  <text x="116" y="492" fill="#94A3B8" font-family="sans-serif" font-size="12">GIM-003</text>
+  <rect x="116" y="502" width="60" height="20" rx="4" fill="#22C55E"/>
+  <text x="126" y="516" fill="white" font-family="sans-serif" font-size="10">Tersedia</text>
+  
+  <!-- Bottom Nav -->
+  <rect x="0" y="764" width="390" height="80" fill="#1E293B"/>
+  <text x="50" y="810" fill="#6366F1" font-family="sans-serif" font-size="12" text-anchor="middle">Barang</text>
+  <text x="130" y="810" fill="#94A3B8" font-family="sans-serif" font-size="12" text-anchor="middle">Sewa</text>
+  <text x="260" y="810" fill="#94A3B8" font-family="sans-serif" font-size="12" text-anchor="middle">Kembali</text>
+  <text x="340" y="810" fill="#94A3B8" font-family="sans-serif" font-size="12" text-anchor="middle">Riwayat</text>
+</svg>

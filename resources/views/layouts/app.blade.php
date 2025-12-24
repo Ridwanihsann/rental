@@ -106,9 +106,24 @@
     @stack('scripts')
 
     <script>
-        // Toast notification function
+        // Toast notification function - prevents duplicate messages
+        const activeToasts = new Map(); // Track active toasts by message
+
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
+
+            // Check if toast with same message already exists
+            if (activeToasts.has(message)) {
+                // Reset the timer for existing toast
+                const existingData = activeToasts.get(message);
+                clearTimeout(existingData.timeout);
+                existingData.timeout = setTimeout(() => {
+                    existingData.element.remove();
+                    activeToasts.delete(message);
+                }, 3000);
+                return; // Don't create duplicate
+            }
+
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
             toast.innerHTML = `
@@ -122,9 +137,13 @@
             `;
             container.appendChild(toast);
 
-            setTimeout(() => {
+            // Track this toast
+            const timeout = setTimeout(() => {
                 toast.remove();
+                activeToasts.delete(message);
             }, 3000);
+
+            activeToasts.set(message, { element: toast, timeout: timeout });
         }
 
         // Loading overlay functions

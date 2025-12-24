@@ -7,13 +7,20 @@ if ('serviceWorker' in navigator) {
             .then(registration => {
                 console.log('SW registered:', registration.scope);
 
-                // Check for updates
+                // Check for updates silently - no popup
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // New version available
-                            if (confirm('Versi baru tersedia. Muat ulang sekarang?')) {
+                            // New version available - auto reload without asking
+                            // Use sessionStorage to prevent reload loop
+                            const lastReload = sessionStorage.getItem('sw-reload-time');
+                            const now = Date.now();
+
+                            // Only reload if not reloaded in the last 10 seconds
+                            if (!lastReload || (now - parseInt(lastReload)) > 10000) {
+                                sessionStorage.setItem('sw-reload-time', now.toString());
+                                console.log('New SW version available, reloading...');
                                 window.location.reload();
                             }
                         }
@@ -25,6 +32,7 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
 
 // PWA Install Prompt
 let deferredPrompt;
@@ -43,24 +51,35 @@ function showInstallPrompt() {
         return;
     }
 
+    // Check if prompt was dismissed recently (within 24 hours)
+    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
+    if (dismissed && (Date.now() - parseInt(dismissed)) < 86400000) {
+        return;
+    }
+
     // Create install prompt element
     const prompt = document.createElement('div');
     prompt.className = 'install-prompt';
     prompt.innerHTML = `
-        <p>📱 Install RentalApp untuk akses cepat!</p>
+        <p>📱 Install app?</p>
         <button class="install-btn" onclick="installApp()">Install</button>
-        <button onclick="this.parentElement.remove()" style="background: transparent; border: none; color: white; cursor: pointer; padding: 0.5rem;">✕</button>
+        <button class="close-btn" onclick="dismissInstallPrompt(this.parentElement)">✕</button>
     `;
 
     document.body.appendChild(prompt);
 
-    // Auto hide after 10 seconds
+    // Auto hide after 8 seconds
     setTimeout(() => {
         if (prompt.parentElement) {
             prompt.remove();
         }
-    }, 10000);
+    }, 8000);
 }
+
+window.dismissInstallPrompt = function (element) {
+    localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
+    element.remove();
+};
 
 window.installApp = async function () {
     if (deferredPrompt) {
