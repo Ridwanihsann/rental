@@ -103,6 +103,23 @@
         <div class="spinner"></div>
     </div>
 
+    <!-- Show flash messages -->
+    @if(session('success'))
+        <script>document.addEventListener('DOMContentLoaded', () => showToast("{{ session('success') }}", 'success'));</script>
+    @endif
+    @if(session('error'))
+        <script>document.addEventListener('DOMContentLoaded', () => showToast("{{ session('error') }}", 'error'));</script>
+    @endif
+    @if($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                @foreach($errors->all() as $error)
+                    showToast("{{ $error }}", 'error');
+                @endforeach
+                });
+        </script>
+    @endif
+
     @stack('scripts')
 
     <script>
