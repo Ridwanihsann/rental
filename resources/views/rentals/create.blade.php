@@ -159,6 +159,8 @@
         // Cart state
         let cart = [];
         let html5QrCode = null;
+        let lastScannedCode = null;
+        let scanCooldown = false;
 
         // Initialize QR Scanner
         function initScanner() {
@@ -176,6 +178,25 @@
         }
 
         function onScanSuccess(decodedText) {
+            // Debounce - ignore if same code scanned recently or cooldown active
+            if (scanCooldown || decodedText === lastScannedCode) {
+                return;
+            }
+
+            // Set cooldown to prevent rapid duplicate scans
+            scanCooldown = true;
+            lastScannedCode = decodedText;
+            setTimeout(() => {
+                scanCooldown = false;
+            }, 2000); // 2 second cooldown
+
+            // Reset last scanned code after 5 seconds to allow re-scanning same item
+            setTimeout(() => {
+                if (lastScannedCode === decodedText) {
+                    lastScannedCode = null;
+                }
+            }, 5000);
+
             // Vibrate for feedback
             if (navigator.vibrate) navigator.vibrate(100);
 
@@ -225,31 +246,31 @@
 
             if (cart.length === 0) {
                 container.innerHTML = `
-                            <div class="empty-state">
-                                <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-text-muted); opacity: 0.5;">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                </svg>
-                                <h3 style="margin-bottom: 0.5rem;">Belum ada barang</h3>
-                                <p style="color: var(--color-text-muted);">Scan QR atau cari barang untuk ditambahkan</p>
-                            </div>
-                        `;
+                                <div class="empty-state">
+                                    <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--color-text-muted); opacity: 0.5;">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                    <h3 style="margin-bottom: 0.5rem;">Belum ada barang</h3>
+                                    <p style="color: var(--color-text-muted);">Scan QR atau cari barang untuk ditambahkan</p>
+                                </div>
+                            `;
                 document.getElementById('continue-section').style.display = 'none';
                 return;
             }
 
             container.innerHTML = cart.map(item => `
-                        <div class="cart-item">
-                            <div class="item-info">
-                                <div class="item-name">${item.name}</div>
-                                <div class="item-price">${formatRupiah(item.daily_price)}/hari</div>
+                            <div class="cart-item">
+                                <div class="item-info">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-price">${formatRupiah(item.daily_price)}/hari</div>
+                                </div>
+                                <button class="remove-btn" onclick="removeFromCart('${item.code}')">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
                             </div>
-                            <button class="remove-btn" onclick="removeFromCart('${item.code}')">
-                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    `).join('');
+                        `).join('');
 
             document.getElementById('continue-section').style.display = 'block';
         }
@@ -291,33 +312,33 @@
 
                     if (data.items.length === 0) {
                         container.innerHTML = `
-                                    <div class="empty-state">
-                                        <h3>Tidak ada barang tersedia</h3>
-                                        <p style="color: var(--color-text-muted);">Semua barang sedang disewa</p>
-                                    </div>
-                                `;
+                                        <div class="empty-state">
+                                            <h3>Tidak ada barang tersedia</h3>
+                                            <p style="color: var(--color-text-muted);">Semua barang sedang disewa</p>
+                                        </div>
+                                    `;
                         return;
                     }
 
                     container.innerHTML = data.items.map(item => `
-                                <div class="item-card" onclick="selectItem('${item.code}')" style="cursor: pointer;">
-                                    <div class="item-image">
-                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                                        </svg>
+                                    <div class="item-card" onclick="selectItem('${item.code}')" style="cursor: pointer;">
+                                        <div class="item-image">
+                                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                            </svg>
+                                        </div>
+                                        <div class="item-info">
+                                            <div class="item-name">${item.name}</div>
+                                            <div class="item-code">${item.code}</div>
+                                            <div class="item-price">${formatRupiah(item.daily_price)}/hari</div>
+                                        </div>
+                                        <div style="color: var(--color-success);">
+                                            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <div class="item-info">
-                                        <div class="item-name">${item.name}</div>
-                                        <div class="item-code">${item.code}</div>
-                                        <div class="item-price">${formatRupiah(item.daily_price)}/hari</div>
-                                    </div>
-                                    <div style="color: var(--color-success);">
-                                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                            `).join('');
+                                `).join('');
                 });
         }
 
@@ -386,7 +407,27 @@
         document.getElementById('end_date')?.addEventListener('change', calculatePricing);
 
         document.getElementById('rental-form')?.addEventListener('submit', function (e) {
-            document.getElementById('items-input').value = JSON.stringify(cart.map(item => item.id));
+            // Validate cart has items
+            if (cart.length === 0) {
+                e.preventDefault();
+                showToast('Pilih minimal 1 barang', 'error');
+                return;
+            }
+
+            // Validate dates
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            if (!startDate || !endDate) {
+                e.preventDefault();
+                showToast('Lengkapi tanggal sewa', 'error');
+                return;
+            }
+
+            // Set items data
+            const itemIds = cart.map(item => item.id);
+            console.log('Submitting items:', itemIds);
+            document.getElementById('items-input').value = JSON.stringify(itemIds);
+
             showLoading();
         });
 

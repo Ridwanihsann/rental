@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rental-app-v3';
+const CACHE_NAME = 'rental-app-v4';
 const STATIC_ASSETS = [
     '/',
     '/items',
@@ -7,34 +7,18 @@ const STATIC_ASSETS = [
     '/icons/icon.svg'
 ];
 
-// Optional assets - won't fail if missing
-const OPTIONAL_ASSETS = [
-    '/css/app.css',
-    '/js/app.js'
-];
-
 // Install event - cache static assets
 self.addEventListener('install', event => {
     console.log('[SW] Installing...');
     event.waitUntil(
-        caches.open(CACHE_NAME).then(async cache => {
+        caches.open(CACHE_NAME).then(cache => {
             console.log('[SW] Caching static assets');
-            // Cache required assets
-            await cache.addAll(STATIC_ASSETS);
-
-            // Cache optional assets individually (won't fail if missing)
-            for (const asset of OPTIONAL_ASSETS) {
-                try {
-                    await cache.add(asset);
-                    console.log('[SW] Cached:', asset);
-                } catch (err) {
-                    console.log('[SW] Optional asset not available:', asset);
-                }
-            }
+            return cache.addAll(STATIC_ASSETS);
         })
     );
     self.skipWaiting();
 });
+
 
 
 // Activate event - clean old caches
