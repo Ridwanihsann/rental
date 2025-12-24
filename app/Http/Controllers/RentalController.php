@@ -22,10 +22,16 @@ class RentalController extends Controller
     public function store(Request $request)
     {
         try {
+            // Check if KTP file is valid before full validation
+            if ($request->hasFile('renter_ktp') && !$request->file('renter_ktp')->isValid()) {
+                \Log::error('KTP upload failed', ['error' => $request->file('renter_ktp')->getError()]);
+                return back()->with('error', 'Gagal upload foto KTP. Coba foto dengan ukuran lebih kecil.')->withInput();
+            }
+
             $validated = $request->validate([
                 'renter_name' => 'required|string|max:255',
-                'renter_phone' => 'required|string|max:20',
-                'renter_ktp' => 'nullable|image|max:5120', // Max 5MB
+                'renter_phone' => 'required|string|max:50',
+                'renter_ktp' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,heic,heif|max:15360', // Max 15MB, support mobile formats
                 'start_date' => 'required|date',
                 'end_date' => 'required|date|after_or_equal:start_date',
                 'items' => 'required|json',
