@@ -10,9 +10,11 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('rentals', function (Blueprint $table) {
-            $table->string('renter_ktp')->nullable()->after('renter_phone');
-        });
+        if (!Schema::hasColumn('rentals', 'renter_ktp')) {
+            Schema::table('rentals', function (Blueprint $table) {
+                $table->string('renter_ktp')->nullable()->after('renter_phone');
+            });
+        }
     }
 
     /**

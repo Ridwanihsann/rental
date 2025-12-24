@@ -10,16 +10,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('rental_items', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('rental_id')->constrained()->onDelete('cascade');
-            $table->foreignId('item_id')->constrained()->onDelete('cascade');
-            $table->unsignedInteger('daily_price'); // Price at time of rental
-            $table->timestamps();
+        if (!Schema::hasTable('rental_items')) {
+            Schema::create('rental_items', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('rental_id')->constrained()->onDelete('cascade');
+                $table->foreignId('item_id')->constrained()->onDelete('cascade');
+                $table->unsignedInteger('daily_price'); // Price at time of rental
+                $table->timestamps();
 
-            // Prevent duplicate item in same rental
-            $table->unique(['rental_id', 'item_id']);
-        });
+                // Prevent duplicate item in same rental
+                $table->unique(['rental_id', 'item_id']);
+            });
+        }
     }
 
     /**

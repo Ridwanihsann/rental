@@ -10,20 +10,22 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('items', function (Blueprint $table) {
-            $table->id();
-            $table->string('code', 20)->unique(); // Unique code for QR
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->unsignedInteger('daily_price'); // Price in IDR
-            $table->enum('status', ['available', 'rented'])->default('available');
-            $table->string('image')->nullable(); // Path to image file
-            $table->timestamps();
+        if (!Schema::hasTable('items')) {
+            Schema::create('items', function (Blueprint $table) {
+                $table->id();
+                $table->string('code', 20)->unique(); // Unique code for QR
+                $table->string('name');
+                $table->text('description')->nullable();
+                $table->unsignedInteger('daily_price'); // Price in IDR
+                $table->enum('status', ['available', 'rented'])->default('available');
+                $table->string('image')->nullable(); // Path to image file
+                $table->timestamps();
 
-            // Indexes
-            $table->index('status');
-            $table->index('name');
-        });
+                // Indexes
+                $table->index('status');
+                $table->index('name');
+            });
+        }
     }
 
     /**

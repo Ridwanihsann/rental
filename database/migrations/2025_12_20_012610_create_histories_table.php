@@ -10,17 +10,19 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('histories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('rental_id')->constrained()->onDelete('cascade');
-            $table->dateTime('actual_return_date');
-            $table->unsignedInteger('penalty_fee')->default(0); // Late fee in IDR
-            $table->unsignedInteger('final_total_price'); // Total + penalty
-            $table->timestamps();
+        if (!Schema::hasTable('histories')) {
+            Schema::create('histories', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('rental_id')->constrained()->onDelete('cascade');
+                $table->dateTime('actual_return_date');
+                $table->unsignedInteger('penalty_fee')->default(0); // Late fee in IDR
+                $table->unsignedInteger('final_total_price'); // Total + penalty
+                $table->timestamps();
 
-            // Each rental can only have one history record
-            $table->unique('rental_id');
-        });
+                // Each rental can only have one history record
+                $table->unique('rental_id');
+            });
+        }
     }
 
     /**

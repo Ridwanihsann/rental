@@ -10,21 +10,23 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('rentals', function (Blueprint $table) {
-            $table->id();
-            $table->string('renter_name');
-            $table->string('renter_phone', 20);
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->unsignedInteger('total_price'); // Calculated total in IDR
-            $table->enum('status', ['active', 'done'])->default('active');
-            $table->timestamps();
+        if (!Schema::hasTable('rentals')) {
+            Schema::create('rentals', function (Blueprint $table) {
+                $table->id();
+                $table->string('renter_name');
+                $table->string('renter_phone', 20);
+                $table->date('start_date');
+                $table->date('end_date');
+                $table->unsignedInteger('total_price'); // Calculated total in IDR
+                $table->enum('status', ['active', 'done'])->default('active');
+                $table->timestamps();
 
-            // Indexes
-            $table->index('status');
-            $table->index('end_date');
-            $table->index(['status', 'end_date']);
-        });
+                // Indexes
+                $table->index('status');
+                $table->index('end_date');
+                $table->index(['status', 'end_date']);
+            });
+        }
     }
 
     /**
